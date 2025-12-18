@@ -17,14 +17,16 @@ import com.demo.demo.repository.UserRepository;
 @RestController
 public class RegisterController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public RegisterController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User userRequest){
+    public ResponseEntity<Map<String, String>> register(@RequestBody User userRequest){
         if (userRepository.findByUsername(userRequest.getUsername()) != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message","El usuario ya existe"));
         }

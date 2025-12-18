@@ -1,0 +1,77 @@
+name: OWASP Dependency-Check
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-check:
+    runs-on: ubuntu-latest
+
+    env:
+      # Enforce build failure if any CVE with CVSS >= this value is found.
+      # Keep artifacts upload enabled regardless of failure.
+      FAIL_BUILD_ON_CVSS: "9.0"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Ensure Maven Wrapper is executable
+        run: |
+          chmod +x demo/mvnw
+          chmod +x frontend/mvnw
+
+      - name: Run Dependency-Check (demo)
+        id: scan_demo
+        continue-on-error: true
+        env:
+          NVD_API_KEY: ${{ secrets['NVD_API_KEY'] }}
+        run: |
+          EXTRA_ARGS=""
+          if [ -n "${NVD_API_KEY}" ]; then
+            EXTRA_ARGS="-DnvdApiKey=${NVD_API_KEY}"
+          fi
+          cd demo
+          ./mvnw -B -ntp -DskipTests -DfailBuildOnCVSS=${FAIL_BUILD_ON_CVSS} ${EXTRA_ARGS} dependency-check:check
+
+      - name: Run Dependency-Check (frontend)
+        id: scan_frontend
+        continue-on-error: true
+        env:
+          NVD_API_KEY: ${{ secrets['NVD_API_KEY'] }}
+        run: |
+          EXTRA_ARGS=""
+          if [ -n "${NVD_API_KEY}" ]; then
+            EXTRA_ARGS="-DnvdApiKey=${NVD_API_KEY}"
+          fi
+          cd frontend
+          ./mvnw -B -ntp -DskipTests -DfailBuildOnCVSS=${FAIL_BUILD_ON_CVSS} ${EXTRA_ARGS} dependency-check:check
+
+      - name: Upload Dependency-Check reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-reports
+          path: |
+            demo/target/dependency-check-report.*
+            frontend/target/dependency-check-report.*
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Fail workflow if any scan failed
+        if: ${{ steps.scan_demo.outcome == 'failure' || steps.scan_frontend.outcome == 'failure' }}
+        run: exit 1

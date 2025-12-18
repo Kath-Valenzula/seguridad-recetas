@@ -29,6 +29,7 @@
 	<properties>
 		<java.version>21</java.version>
 		<dependency-check-maven.version>12.1.0</dependency-check-maven.version>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -126,6 +127,9 @@
 				  <version>${dependency-check-maven.version}</version>
 				  <configuration>
 					  <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+					  <suppressionFiles>
+						  <suppressionFile>${project.basedir}/dependency-check-suppressions.xml</suppressionFile>
+					  </suppressionFiles>
 					  <failOnError>false</failOnError>
 				  </configuration>
               <executions>

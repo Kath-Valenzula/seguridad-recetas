@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+  <suppress>
+    <notes><![CDATA[
+      "web_project:web" is a generic/placeholder CPE that frequently gets assigned to many Java web artifacts.
+      It is not a meaningful product identifier for our purposes, so we suppress it globally to reduce report noise.
+    ]]></notes>
+    <cpe>cpe:/a:web_project:web</cpe>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+      Various Jakarta artifacts are being incorrectly mapped to the generic CPE "oracle:projects" with Low confidence.
+      Suppress this noisy identifier for Jakarta group artifacts.
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/jakarta\.[^/]+/.+@.+$</packageUrl>
+    <cpe>cpe:/a:oracle:projects</cpe>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+      Jackson artifacts are sometimes mapped to the umbrella CPE "fasterxml:jackson-modules-java8" with Low confidence.
+      Suppress this noisy identifier for the affected Jackson artifacts.
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.(core|datatype|module)/jackson-[^@]+@2\.19\.4$</packageUrl>
+    <cpe>cpe:/a:fasterxml:jackson-modules-java8</cpe>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+      spring-ws-core is sometimes mapped to the CPE "pivotal_software:spring_web_services" with Low confidence.
+      This is a noisy/legacy identifier; suppress it only for Spring-WS artifacts at 4.1.2 used by this project.
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.springframework\.ws/(spring-ws-core|spring-xml)@4\.1\.2$</packageUrl>
+    <cpe>cpe:/a:pivotal_software:spring_web_services</cpe>
+  </suppress>
+
+  <!-- demo module does not use thymeleaf; keep suppressions minimal -->
+</suppressions>

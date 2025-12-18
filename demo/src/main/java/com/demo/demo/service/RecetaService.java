@@ -33,6 +33,9 @@ public class RecetaService {
     private final ValoracionRepository valoracionRepository;
     private final UserRepository userRepository;
 
+    private static final String MSG_RECETA_NO_ENCONTRADA = "Receta no encontrada";
+    private static final String MSG_USUARIO_NO_ENCONTRADO = "Usuario no encontrado";
+
     public RecetaService(RecetaRepository recetaRepository,
             RecetaMediaRepository recetaMediaRepository,
             ComentarioRepository comentarioRepository,
@@ -109,7 +112,7 @@ public class RecetaService {
     public void agregarMedia(Long recetaId, List<RecetaMediaDTO> mediaDtos) {
         Objects.requireNonNull(recetaId, "recetaId es requerido");
         Receta receta = recetaRepository.findById(recetaId)
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+                .orElseThrow(() -> new RuntimeException(MSG_RECETA_NO_ENCONTRADA));
 
         for (RecetaMediaDTO dto : mediaDtos) {
             RecetaMedia media = new RecetaMedia();
@@ -124,9 +127,9 @@ public class RecetaService {
         Objects.requireNonNull(recetaId, "recetaId es requerido");
         Objects.requireNonNull(userId, "userId es requerido");
         Receta receta = recetaRepository.findById(recetaId)
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+                .orElseThrow(() -> new RuntimeException(MSG_RECETA_NO_ENCONTRADA));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException(MSG_USUARIO_NO_ENCONTRADO));
 
         Comentario comentario = new Comentario();
         comentario.setReceta(receta);
@@ -139,9 +142,9 @@ public class RecetaService {
         Objects.requireNonNull(recetaId, "recetaId es requerido");
         Objects.requireNonNull(userId, "userId es requerido");
         Receta receta = recetaRepository.findById(recetaId)
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+                .orElseThrow(() -> new RuntimeException(MSG_RECETA_NO_ENCONTRADA));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException(MSG_USUARIO_NO_ENCONTRADO));
 
         Valoracion valoracion = new Valoracion();
         valoracion.setReceta(receta);
@@ -153,7 +156,7 @@ public class RecetaService {
     public com.demo.demo.dto.RecetaDetalleDTO obtenerDetallePorId(Long id) {
         Objects.requireNonNull(id, "id es requerido");
         Receta receta = recetaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+                .orElseThrow(() -> new RuntimeException(MSG_RECETA_NO_ENCONTRADA));
 
         com.demo.demo.dto.RecetaDetalleDTO dto = new com.demo.demo.dto.RecetaDetalleDTO();
         dto.setId(receta.getId());

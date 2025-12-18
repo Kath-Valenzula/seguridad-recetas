@@ -20,17 +20,21 @@ import com.demo.demo.service.MyUserDetailsService;
 @RestController
 public class LoginController {
 
-    @Autowired
-    JWTAuthenticationConfig jwtAuthtenticationConfig;
+    private final JWTAuthenticationConfig jwtAuthtenticationConfig;
 
-    @Autowired
-    private MyUserDetailsService userDetailsService;
+    private final MyUserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public LoginController(JWTAuthenticationConfig jwtAuthtenticationConfig,
+            MyUserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
+        this.jwtAuthtenticationConfig = jwtAuthtenticationConfig;
+        this.userDetailsService = userDetailsService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login( @RequestParam String username,@RequestParam String password){
+    public ResponseEntity<Map<String, String>> login(@RequestParam String username, @RequestParam String password){
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         if (userDetails == null || !passwordEncoder.matches(password, userDetails.getPassword())) {

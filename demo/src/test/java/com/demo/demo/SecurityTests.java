@@ -3,9 +3,12 @@ package com.demo.demo;
 import java.io.IOException;
 import java.security.Key;
 import java.util.Objects;
+import java.lang.reflect.Modifier;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,6 +68,7 @@ class SecurityTests {
 
     @Test
     void testJWTAuthorizationFilterValidToken() throws ServletException, IOException {
+        SecurityContextHolder.clearContext();
         JWTAuthenticationConfig config = new JWTAuthenticationConfig(TEST_JWT_SECRET);
         String token = config.getJWTToken("juan");
 
@@ -83,17 +87,20 @@ class SecurityTests {
 
     @Test
     void testJWTAuthorizationFilterNoToken() throws ServletException, IOException {
+        SecurityContextHolder.clearContext();
         JWTAuthorizationFilter jwtAuthorizationFilter = new JWTAuthorizationFilter(TEST_JWT_SECRET);
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain filterChain = new MockFilterChain();
 
         jwtAuthorizationFilter.doFilterInternal(request, response, filterChain);
-        // The filter clears context if invalid
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        assertEquals(HttpServletResponse.SC_OK, response.getStatus());
     }
 
     @Test
     void testJWTAuthorizationFilterInvalidToken() throws ServletException, IOException {
+        SecurityContextHolder.clearContext();
         JWTAuthorizationFilter jwtAuthorizationFilter = new JWTAuthorizationFilter(TEST_JWT_SECRET);
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(Constants.HEADER_AUTHORIZATION, "Bearer invalidtoken");
@@ -106,12 +113,16 @@ class SecurityTests {
     }
 
     @Test
-    void testConstantsConstructor() {
-        new Constants();
+    void testConstantsConstructor() throws Exception {
+        var constructor = Constants.class.getDeclaredConstructor();
+        assertTrue(Modifier.isPrivate(constructor.getModifiers()));
+        constructor.setAccessible(true);
+        assertNotNull(constructor.newInstance());
     }
 
     @Test
     void testJWTAuthorizationFilterExpiredToken() throws ServletException, IOException {
+        SecurityContextHolder.clearContext();
         JWTAuthorizationFilter jwtAuthorizationFilter = new JWTAuthorizationFilter(TEST_JWT_SECRET);
         String token = io.jsonwebtoken.Jwts.builder()
                 .subject("juan")
@@ -132,6 +143,7 @@ class SecurityTests {
 
     @Test
     void testJWTAuthorizationFilterNoAuthorities() throws ServletException, IOException {
+        SecurityContextHolder.clearContext();
         JWTAuthorizationFilter jwtAuthorizationFilter = new JWTAuthorizationFilter(TEST_JWT_SECRET);
         String token = io.jsonwebtoken.Jwts.builder()
                 .subject("juan")
@@ -152,6 +164,7 @@ class SecurityTests {
 
     @Test
     void testJWTAuthorizationFilterNonBearerToken() throws ServletException, IOException {
+        SecurityContextHolder.clearContext();
         JWTAuthorizationFilter jwtAuthorizationFilter = new JWTAuthorizationFilter(TEST_JWT_SECRET);
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(Constants.HEADER_AUTHORIZATION, "Basic sometoken");
@@ -165,6 +178,6 @@ class SecurityTests {
 
     @Test
     void testDemoApplication() {
-        DemoApplication.main(new String[] {});
+        assertDoesNotThrow(() -> DemoApplication.main(new String[] {}));
     }
 }
