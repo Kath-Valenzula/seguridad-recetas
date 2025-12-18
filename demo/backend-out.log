@@ -4856,3 +4856,4 @@ Hibernate: select r1_0.id,r1_0.dificultad,r1_0.imagen_url,r1_0.ingredientes,r1_0
 2025-12-18T00:28:32.274-03:00 DEBUG 25324 --- [demo] [nio-8082-exec-7] o.j.s.OpenEntityManagerInViewInterceptor : Closing JPA EntityManager in OpenEntityManagerInViewInterceptor
 2025-12-18T00:28:32.274-03:00 DEBUG 25324 --- [demo] [nio-8082-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
 2025-12-18T00:28:32.275-03:00 DEBUG 25324 --- [demo] [nio-8082-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-12-18T10:20:23.483-03:00  WARN 25324 --- [demo] [l-1:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=8h10m38s745ms958µs100ns).
