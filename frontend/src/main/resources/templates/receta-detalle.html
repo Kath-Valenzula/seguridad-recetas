@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${nombre}">Receta</title>
+  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+  <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+  <div class="container my-5">
+    <div class="card shadow-lg border-0 rounded-4 mx-auto" style="max-width: 800px;">
+
+      <img th:src="${imagenUrl}" 
+           th:alt="${nombre}" 
+           class="card-img-top rounded-top-4" 
+           style="max-height: 400px; object-fit: cover;">
+
+      <div class="card-body p-5">
+        <h1 class="card-title text-center mb-4" th:text="${nombre}"></h1>
+
+        <!-- Share Buttons -->
+        <div class="d-flex justify-content-center gap-3 mb-4">
+          <a th:href="'https://wa.me/?text=' + ${nombre} + ' - ' + 'http://localhost:8081/recetas/' + ${receta.id}" 
+             target="_blank" 
+             class="btn btn-success btn-sm">
+            <i class="bi bi-whatsapp"></i> Compartir por WhatsApp
+          </a>
+          <button type="button" 
+                  class="btn btn-danger btn-sm" 
+                  th:onclick="'navigator.clipboard.writeText(\'http://localhost:8081/recetas/' + ${receta.id} + '\'); alert(\'Link copiado! Ahora puedes pegarlo en Instagram\');'">
+            <i class="bi bi-instagram"></i> Copiar link para Instagram
+          </button>
+        </div>
+
+        <div class="d-flex justify-content-center gap-5 mb-4">
+          <p class="mb-0"><strong>Dificultad:</strong> <span th:text="${dificultad}"></span></p>
+          <p class="mb-0"><strong>Tiempo:</strong> <span th:text="${tiempo}"></span></p>
+          <p class="mb-0" th:if="${valoraciones != null and !valoraciones.empty}">
+              <strong>Valoración:</strong> 
+              <span th:text="${#aggregates.avg(valoraciones.![puntuacion])}"></span> / 5
+          </p>
+        </div>
+
+        <h4 class="mt-4 mb-3 text-primary">Ingredientes</h4>
+        <ul class="list-group list-group-flush mb-4">
+          <li class="list-group-item" 
+              th:each="i : ${ingredientes}" 
+              th:text="${i}">
+          </li>
+        </ul>
+
+        <h4 class="mt-4 mb-3 text-primary">Instrucciones</h4>
+        <p class="text-muted" 
+           th:each="i : ${instrucciones}" 
+           th:text="${i}">
+        </p>
+
+        <!-- Media Section -->
+        <div class="mt-5">
+            <h4 class="text-primary mb-3">Galería</h4>
+            <div class="row g-3">
+                <div class="col-md-4" th:each="m : ${media}">
+                    <img th:if="${m.tipo == 'FOTO'}" th:src="${m.url}" class="img-fluid rounded" alt="Foto receta">
+                    <video th:if="${m.tipo == 'VIDEO'}" th:src="${m.url}" class="img-fluid rounded" controls></video>
+                </div>
+            </div>
+            
+            <div class="mt-3" sec:authorize="isAuthenticated()">
+                <h5>Agregar Multimedia</h5>
+                <form th:action="@{/recetas/{id}/media(id=${receta.id})}" method="post" class="row g-3">
+                    <div class="col-md-8">
+                        <input type="text" name="url" class="form-control" placeholder="URL de la imagen o video" required>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="tipo" class="form-select">
+                            <option value="FOTO">Foto</option>
+                            <option value="VIDEO">Video</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary">+</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Ratings Section -->
+        <div class="mt-5">
+            <h4 class="text-primary mb-3">Valoraciones</h4>
+            
+            <!-- List of existing ratings -->
+            <div class="mb-3" th:if="${valoraciones != null and !valoraciones.empty}">
+                <div class="list-group">
+                    <div class="list-group-item d-flex justify-content-between align-items-center" th:each="v : ${valoraciones}">
+                        <div>
+                            <strong th:text="${v.nombreUsuario}">Usuario</strong>
+                        </div>
+                        <div>
+                            <span class="badge bg-warning text-dark" th:text="${v.puntuacion} + ' ★'">5 ★</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div sec:authorize="isAuthenticated()">
+                <form th:action="@{/recetas/{id}/valoraciones(id=${receta.id})}" method="post" class="d-flex align-items-center gap-2">
+                    <label>Tu valoración:</label>
+                    <select name="puntuacion" class="form-select w-auto">
+                        <option value="5">5 - Excelente</option>
+                        <option value="4">4 - Muy buena</option>
+                        <option value="3">3 - Buena</option>
+                        <option value="2">2 - Regular</option>
+                        <option value="1">1 - Mala</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Calificar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="mt-5">
+            <h4 class="text-primary mb-3">Comentarios</h4>
+            <div class="list-group mb-3">
+                <div class="list-group-item" th:each="c : ${comentarios}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="mb-1" th:text="${c.contenido}"></p>
+                            <small class="text-muted">
+                                <strong th:text="${c.nombreUsuario}">Usuario</strong>
+                                <span th:if="${c.fechaCreacion}" th:text="' - ' + ${c.fechaCreacion}"></span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-group-item text-muted" th:if="${comentarios == null or comentarios.empty}">
+                    No hay comentarios aún.
+                </div>
+            </div>
+
+            <div sec:authorize="isAuthenticated()">
+                <h5>Deja un comentario</h5>
+                <form th:action="@{/recetas/{id}/comentarios(id=${receta.id})}" method="post">
+                    <div class="mb-3">
+                        <textarea name="contenido" class="form-control" rows="3" placeholder="Escribe tu comentario..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Comentar</button>
+                </form>
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
