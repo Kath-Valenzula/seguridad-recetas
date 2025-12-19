@@ -32,7 +32,7 @@ public class WebSecurityConfig {
                                 "/register")
                         .permitAll()
                         .anyRequest().authenticated())
-                .formLogin((form) -> form
+                .formLogin(form -> form
                         .loginPage("/login")
                         .failureHandler((request, response, exception) -> response.sendRedirect("/login?error=true"))
                         .permitAll())
