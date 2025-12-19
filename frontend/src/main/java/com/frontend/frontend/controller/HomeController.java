@@ -24,30 +24,28 @@ public class HomeController {
 
     @GetMapping("/home")
     public String home(Model model) {
-        List<RecetaDTO> recetasPopulares = recetaService.buscarRecetas(null, null, null, null, null, true);
-        List<RecetaDTO> recetasRecientes = recetaService.buscarRecetas(null, null, null, null, null, null);
-
-        model.addAttribute("recetasPopulares", recetasPopulares);
-        model.addAttribute("recetasRecientes", recetasRecientes);
-
-        return "home";
+        return renderHome(model);
     }
 
     @GetMapping("/")
     public String inicio(Model model) {
-        List<RecetaDTO> recetasPopulares = recetaService.buscarRecetas(null, null, null, null, null, true);
-        List<RecetaDTO> recetasRecientes = recetaService.buscarRecetas(null, null, null, null, null, null);
-
-        model.addAttribute("recetasPopulares", recetasPopulares);
-        model.addAttribute("recetasRecientes", recetasRecientes);
-
-        return "home";
+        return renderHome(model);
     }
 
     @PostMapping("/logout")
     public String logout() {
         tokenStore.setToken(null);
         return "redirect:/login";
+    }
+
+    private String renderHome(Model model) {
+        List<RecetaDTO> recetasPopulares = recetaService.buscarRecetas(null, null, null, null, null, true);
+        List<RecetaDTO> recetasRecientes = recetaService.buscarRecetas(null, null, null, null, null, null);
+
+        model.addAttribute("recetasPopulares", recetasPopulares);
+        model.addAttribute("recetasRecientes", recetasRecientes);
+
+        return "home";
     }
 
 }

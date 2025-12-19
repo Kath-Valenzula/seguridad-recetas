@@ -16,10 +16,9 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Controller
-@SuppressWarnings({ "null", "catching" })
 public class AuthController {
 
-    private final String backendUrl = "http://localhost:8082/register";
+    private static final String BACKEND_REGISTER_URL = "http://localhost:8082/register";
     private final RestTemplate restTemplate;
 
     public AuthController(RestTemplate restTemplate) {
@@ -51,7 +50,7 @@ public class AuthController {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, String>> entity = new HttpEntity<>(requestBody, headers);
-            restTemplate.exchange(backendUrl, HttpMethod.POST, entity, String.class);
+            restTemplate.exchange(BACKEND_REGISTER_URL, HttpMethod.POST, entity, String.class);
 
             model.addAttribute("message", "Usuario registrado correctamente. Ahora puedes iniciar sesión.");
         } catch (RestClientException ex) {

@@ -1,6 +1,5 @@
 package com.frontend.frontend;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,8 +10,11 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class WebSecurityConfig {
 
-    @Autowired
-    private CustomAuthenticationProvider authProvider;
+        private final CustomAuthenticationProvider authProvider;
+
+        public WebSecurityConfig(CustomAuthenticationProvider authProvider) {
+                this.authProvider = authProvider;
+        }
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
@@ -25,16 +27,14 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((requests) -> requests
+                .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/", "/home", "/login", "/js/**", "/css/**", "/img/**", "/recetas/**",
                                 "/register")
                         .permitAll()
                         .anyRequest().authenticated())
                 .formLogin((form) -> form
                         .loginPage("/login")
-                        .failureHandler((request, response, exception) -> {
-                            response.sendRedirect("/login?error=true");
-                        })
+                        .failureHandler((request, response, exception) -> response.sendRedirect("/login?error=true"))
                         .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/logout")

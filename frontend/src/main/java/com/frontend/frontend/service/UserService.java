@@ -1,7 +1,7 @@
 package com.frontend.frontend.service;
 
-import com.frontend.frontend.TokenStore;
-import com.frontend.frontend.model.UsuarioDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -9,13 +9,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import com.frontend.frontend.TokenStore;
+import com.frontend.frontend.model.UsuarioDTO;
 
 @Service
-@SuppressWarnings({ "null", "catching" })
 public class UserService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String BASE_URL = "http://localhost:8082/api/usuarios";
+
     private final RestTemplate restTemplate;
-    private final String baseUrl = "http://localhost:8082/api/usuarios";
     private final TokenStore tokenStore;
 
     public UserService(TokenStore tokenStore, RestTemplate restTemplate) {
@@ -25,13 +32,10 @@ public class UserService {
 
     public UsuarioDTO getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        // Assuming there is an endpoint to find by username or "me"
-        // Trying to find by username as it is more standard if "me" doesn't exist and
-        // we have the username
-        String uri = baseUrl + "/username/" + username;
-
-        // Fallback or alternative: if the backend supports /me
-        // String uri = baseUrl + "/me";
+        String uri = UriComponentsBuilder.fromUriString(BASE_URL)
+            .pathSegment("username")
+            .pathSegment(username)
+            .toUriString();
 
         String token = tokenStore.getToken();
         if (token == null || token.isEmpty()) {
@@ -39,7 +43,7 @@ public class UserService {
         }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + token);
+        headers.set(AUTHORIZATION_HEADER, BEARER_PREFIX + token);
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
@@ -50,7 +54,7 @@ public class UserService {
                     UsuarioDTO.class);
             return response.getBody();
         } catch (org.springframework.web.client.RestClientException e) {
-            System.out.println("Error fetching user: " + e.getMessage());
+            LOGGER.warn("Error fetching user", e);
             return null;
         }
     }
